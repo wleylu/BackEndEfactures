@@ -295,44 +295,44 @@ public class UserServiceImpl implements UserService {
 	public Utilisateur firstAuthentification1(Utilisateur userEntity) {
 		// TODO Auto-generated method stub
 			PassInitialiseur monPasse = new PassInitialiseur();
-			CryptageDatas cypteData = new CryptageDatas();
+			CryptageDatas crypteData = new CryptageDatas();
 			
 			Utilisateur user = new Utilisateur();	
 			Utilisateur users = new Utilisateur();
 			
-			user = userRepository.findByLoginAndPassword(userEntity.getLogin(),userEntity.getPassword());	
-			monPasse.setPass1(userEntity.getPassword1());
-			monPasse.setPass2(user.getPassword2());					
-			monPasse.setPass3(user.getPassword3());
-			
-			boolean valiPass= monPasse.validedPass();
-			
-			System.out.println("Validité du mot de passe : "+valiPass);
+			user = userRepository.findByLoginAndPassword(userEntity.getLogin(),userEntity.getPassword());		
+		
 			
 			if (user != null) {		
 					if(user.getPassword1()==(userEntity.getPassword())) {								
 						users= new Utilisateur();
 					}else {	
-						String pas1=null;
-						String pas2 = null;
-						String pas3 = null;
-						try {
-						/*	pas1=cypteData.cryptageData(monPasse.getPass1());
-							pas2=cypteData.cryptageData(monPasse.getPass2());
-						*/	
-							pas1=monPasse.getPass1();					
-							pas2=monPasse.getPass2();
-							
-							System.out.println("Passe 1: "+pas1);
-							System.out.println("Passe 2: "+pas2);
-						} catch (Exception e) {
-							// TODO: handle exception
+					
+							monPasse.setPass1(userEntity.getPassword1());
+							monPasse.setPass2(user.getPassword2());					
+							monPasse.setPass3(user.getPassword3());
+					
+						boolean valiPass= monPasse.validedPass();
+					
+						if(valiPass){
+							String pass1=null;
+							try {
+								pass1 = crypteData.cryptageData(userEntity.getPassword1());
+							} catch (Exception e) {
+								// TODO: handle exception
+							}
+							user.setDateMdp(new Date(System.currentTimeMillis()));
+							user.setPassword1(bcryptEncoder.encode(userEntity.getPassword1()));
+							user.setPassword2(pass1);
+							user.setPassword3(monPasse.getPass2());
+							users = userRepository.save(user);		
 						}
-						user.setDateMdp(new Date(System.currentTimeMillis()));
-						user.setPassword1(bcryptEncoder.encode(userEntity.getPassword1()));
-						user.setPassword2(pas1);
-						user.setPassword3(pas2);
-						users = userRepository.save(user);						
+						else
+						{
+							users.setLogin(user.getLogin());
+						}
+						
+									
 				}				
 		   }			
 			return users;
